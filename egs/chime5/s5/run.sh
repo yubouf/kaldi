@@ -10,7 +10,7 @@
 nj=96
 decode_nj=20
 stage=0
-enhancement=beamformit # for a new enhancement method,
+enhancement=wpe_beamformit # for a new enhancement method,
                        # change this variable and stage 4
 # End configuration section
 . ./utils/parse_options.sh
@@ -73,12 +73,20 @@ if [ $stage -le 4 ]; then
   # Beamforming using reference arrays
   # enhanced WAV directory
   enhandir=enhan
+  # Applying WPE dereverberation before beamforming
+  # WPE output directory
+  wpe_dir=wpe
+  for dset in dev eval; do
+      local/run_wpe.sh --cmd "$train_cmd"  \
+          ${audio_dir}/${dset} \
+          ${wpe_dir}/${dset}
+  done
   for dset in dev eval; do
     for mictype in u01 u02 u03 u04 u05 u06; do
       local/run_beamformit.sh --cmd "$train_cmd" \
-			      ${audio_dir}/${dset} \
-			      ${enhandir}/${dset}_${enhancement}_${mictype} \
-			      ${mictype}
+          ${wpe_dir}/${dset} \
+          ${enhandir}/${dset}_${enhancement}_${mictype} \
+          ${mictype}
     done
   done
 
